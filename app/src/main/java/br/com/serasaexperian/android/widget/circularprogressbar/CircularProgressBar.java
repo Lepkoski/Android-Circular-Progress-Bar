@@ -24,7 +24,10 @@ public class CircularProgressBar extends View {
     private float startAngle;
     private float endAngle;
     private int strokeColor;
+    private int progressBarColor;
+    private int shapeBackgroundColor;
     private float strokeWidth;
+    private float progressBarWidth;
     private float left;
     private float top;
     private float right;
@@ -52,7 +55,10 @@ public class CircularProgressBar extends View {
             startAngle = a.getFloat(R.styleable.CircularProgressBar_startAngle, 0);
             endAngle = a.getFloat(R.styleable.CircularProgressBar_endAngle, 0);
             strokeWidth = a.getFloat(R.styleable.CircularProgressBar_strokeWidth, 1);
+            progressBarWidth = a.getFloat(R.styleable.CircularProgressBar_progressBarWidth, 2);
             strokeColor = a.getInt(R.styleable.CircularProgressBar_strokeColor, Color.BLACK);
+            progressBarColor = a.getInt(R.styleable.CircularProgressBar_progressBarColor, Color.RED);
+            shapeBackgroundColor = a.getInt(R.styleable.CircularProgressBar_shapeBackgroundColor, Color.TRANSPARENT);
         } finally {
             a.recycle();
         }
@@ -68,12 +74,12 @@ public class CircularProgressBar extends View {
             shapeSize = drawableHeight;
         }
 
-        final float strokeMargin = strokeWidth/2f;
+        final float progressBarMargin = progressBarWidth/2f;
 
-        left = getPaddingLeft() + strokeMargin;
-        top = getPaddingTop() + strokeMargin;
-        right = left + shapeSize - strokeWidth;
-        bottom = top + shapeSize - strokeWidth;
+        left = getPaddingLeft() + progressBarMargin;
+        top = getPaddingTop() + progressBarMargin;
+        right = left + shapeSize - progressBarWidth;
+        bottom = top + shapeSize - progressBarWidth;
 
         if (shapeSize < drawableWidth) {
             switch (horizontalAlignment) {
@@ -81,12 +87,12 @@ public class CircularProgressBar extends View {
                     // do nothing
                     break;
                 case RIGHT:
-                    right = getWidth() - getPaddingRight() - strokeMargin;
-                    left = right - shapeSize + strokeMargin;
+                    right = getWidth() - getPaddingRight() - progressBarMargin;
+                    left = right - shapeSize + progressBarMargin;
                     break;
                 default:
-                    left = drawableWidth / 2f - shapeSize / 2f + strokeMargin + getPaddingLeft();
-                    right = left + shapeSize - strokeWidth;
+                    left = drawableWidth / 2f - shapeSize / 2f + progressBarMargin + getPaddingLeft();
+                    right = left + shapeSize - progressBarWidth;
             }
         }
 
@@ -96,12 +102,12 @@ public class CircularProgressBar extends View {
                     // do nothing
                     break;
                 case BOTTOM:
-                    bottom = getHeight() - getPaddingBottom() - strokeMargin;
-                    top = bottom - shapeSize + strokeMargin;
+                    bottom = getHeight() - getPaddingBottom() - progressBarMargin;
+                    top = bottom - shapeSize + progressBarMargin;
                     break;
                 default:
-                    top = drawableHeight / 2f - shapeSize / 2f + strokeMargin + getPaddingTop();
-                    bottom = top + shapeSize - strokeWidth;
+                    top = drawableHeight / 2f - shapeSize / 2f + progressBarMargin + getPaddingTop();
+                    bottom = top + shapeSize - progressBarWidth;
             }
         }
 
@@ -112,30 +118,51 @@ public class CircularProgressBar extends View {
         final Paint startPaint = new Paint();
         startPaint.setAntiAlias(true);
         startPaint.setStyle(Paint.Style.FILL);
-        startPaint.setStrokeWidth(strokeWidth);
+        startPaint.setStrokeWidth(progressBarWidth);
         startPaint.setColor(Color.GREEN);
 
-        PointF point = getPointForAngle(0, shapeSize/2.0);
+        PointF point = getPointForAngle(startAngle, shapeSize/2.0);
 
         float left = point.x;
         float top = point.y;
-        float right = left + strokeWidth;
-        float bottom = top + strokeWidth;
+        float right = left + progressBarWidth;
+        float bottom = top + progressBarWidth;
 
-        float dotRadius =  strokeWidth/2f * (1f - animationProgress);
+        float dotRadius =  progressBarWidth/2f * (1f - animationProgress);
 
         canvas.drawRoundRect(new RectF(left, top, right, bottom), dotRadius, dotRadius, startPaint);
     }
 
     @NonNull
-    private Paint createPaint() {
-        final Paint arcPaint = new Paint();
-        arcPaint.setAntiAlias(true);
-        arcPaint.setStyle(Paint.Style.STROKE);
-        arcPaint.setStrokeWidth(strokeWidth);
-        arcPaint.setColor(strokeColor);
-        arcPaint.setStrokeCap(Paint.Cap.ROUND);
-        return arcPaint;
+    private Paint createStrokePaint() {
+        final Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(strokeWidth);
+        paint.setColor(strokeColor);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        return paint;
+    }
+
+    @NonNull
+    private Paint createArcPaint() {
+        final Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(progressBarWidth);
+        paint.setColor(progressBarColor);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        return paint;
+    }
+
+    @NonNull
+    private Paint createCirclePaint() {
+        final Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint.setStrokeWidth(progressBarWidth);
+        paint.setColor(shapeBackgroundColor);
+        return paint;
     }
 
     private double calculateArcPerimeter(double angle, double radius) {
@@ -147,9 +174,9 @@ public class CircularProgressBar extends View {
     }
 
     private PointF getPointForAngle(double angle, double radius) {
-        final float strokeMargin = strokeWidth/2f;
-        double x = drawableWidth/2.0 + getPaddingLeft() - strokeMargin + (radius - strokeMargin) * Math.cos(Math.toRadians(angle));
-        double y = drawableHeight/2.0 + getPaddingTop() - strokeMargin + (radius - strokeMargin) * Math.sin(Math.toRadians(angle));
+        final float progressBarMargin = progressBarWidth/2f;
+        double x = shapeSize/2.0 + left - progressBarWidth + (radius - progressBarMargin) * Math.cos(Math.toRadians(angle));
+        double y = shapeSize/2.0 + top - progressBarWidth + (radius - progressBarMargin) * Math.sin(Math.toRadians(angle));
 
         return new PointF((float)x, (float)y);
     }
@@ -161,8 +188,13 @@ public class CircularProgressBar extends View {
         // TODO redraw only if configuration has changed
         final RectF arcRect = createRectF();
 
-        final Paint arcPaint = createPaint();
+        final Paint circlePaint = createCirclePaint();
+        canvas.drawArc(arcRect, 0, 360, false, circlePaint);
 
+        final Paint strokePaint = createStrokePaint();
+        canvas.drawArc(arcRect, 0, 360, false, strokePaint);
+
+        final Paint arcPaint = createArcPaint();
         canvas.drawArc(arcRect, startAngle, endAngle, false, arcPaint);
 
         drawStartPoint(canvas);

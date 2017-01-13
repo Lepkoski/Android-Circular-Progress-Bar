@@ -16,13 +16,17 @@
         android:text="Hello World!" />
 
     <br.com.serasaexperian.android.widget.circularprogressbar.CircularProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="289dp"
-        custom:startAngle="0"
+        android:layout_width="269dp"
+        android:layout_height="103dp"
+        custom:startAngle="-90"
         custom:endAngle="245"
         custom:horizontalAlignment="center"
         custom:verticalAlignment="bottom"
-        custom:strokeWidth="100"
+        custom:strokeWidth="30"
+        custom:shapeBackgroundColor="@android:color/holo_blue_dark"
         android:background="@android:color/darker_gray"
-        android:padding="10dp" />
+        android:padding="10dp"
+        custom:progressBarWidth="60"
+        custom:progressBarColor="@android:color/holo_orange_light"
+        android:layout_weight="0.57" />
 </LinearLayout>
