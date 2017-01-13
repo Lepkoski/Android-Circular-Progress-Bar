@@ -5,7 +5,9 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.RectF;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -17,12 +19,17 @@ import br.com.serasaexperian.circularprogressbar.R;
 
 public class CircularProgressBar extends View {
 
-    private int color;
     private HorizontalAlignment horizontalAlignment;
     private VerticalAlignment verticalAlignment;
-    private float startAngle = 0;
-    private float endAngle = 350;
-    float strokeWidth = 20;
+    private float startAngle;
+    private float endAngle;
+    private int strokeColor;
+    private float strokeWidth;
+    private float left;
+    private float top;
+    private float right;
+    private float bottom;
+    private float animationProgress = 0.5f;
 
     public CircularProgressBar(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -35,15 +42,20 @@ public class CircularProgressBar extends View {
         try {
             int horizontalAlignmentInt = a.getInt(R.styleable.CircularProgressBar_horizontalAlignment, HorizontalAlignment.CENTER.getId());
             horizontalAlignment = HorizontalAlignment.fromId(horizontalAlignmentInt);
+
             int verticalAlignmentInt = a.getInt(R.styleable.CircularProgressBar_verticalAlignment, VerticalAlignment.CENTER.getId());
             verticalAlignment = VerticalAlignment.fromId(verticalAlignmentInt);
+
+            startAngle = a.getFloat(R.styleable.CircularProgressBar_startAngle, 0);
+            endAngle = a.getFloat(R.styleable.CircularProgressBar_endAngle, 0);
+            strokeWidth = a.getFloat(R.styleable.CircularProgressBar_strokeWidth, 1);
+            strokeColor = a.getInt(R.styleable.CircularProgressBar_strokeColor, Color.BLACK);
         } finally {
             a.recycle();
         }
-
-        color = Color.RED;
     }
 
+    @NonNull
     private RectF createRectF() {
         final float drawableWidth = getWidth() - getPaddingLeft() - getPaddingRight();
         final float drawableHeight = getHeight() - getPaddingTop() - getPaddingBottom();
@@ -56,10 +68,10 @@ public class CircularProgressBar extends View {
 
         final float strokeMargin = strokeWidth/2f;
 
-        float left = getPaddingLeft() + strokeMargin;
-        float top = getPaddingTop() + strokeMargin;
-        float right = left + shapeSize - strokeWidth;
-        float bottom = top + shapeSize - strokeWidth;
+        left = getPaddingLeft() + strokeMargin;
+        top = getPaddingTop() + strokeMargin;
+        right = left + shapeSize - strokeWidth;
+        bottom = top + shapeSize - strokeWidth;
 
         if (shapeSize < drawableWidth) {
             switch (horizontalAlignment) {
@@ -94,18 +106,66 @@ public class CircularProgressBar extends View {
         return new RectF(left, top, right, bottom);
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    private void drawStartPoint(Canvas canvas) {
+        final Paint startPaint = new Paint();
+        startPaint.setAntiAlias(true);
+        startPaint.setStyle(Paint.Style.FILL);
+        startPaint.setStrokeWidth(strokeWidth);
+        startPaint.setColor(Color.GREEN);
 
-        RectF arcRect = createRectF();
+        float left = this.left + (this.right - this.left) / 2f - strokeWidth/2f;
+        float top = this.top - strokeWidth/2f;
+        float right = left + strokeWidth;
+        float bottom = top + strokeWidth;
 
+        float radius =  strokeWidth/2f * (1f - animationProgress);
+
+        canvas.drawRoundRect(new RectF(left, top, right, bottom), radius, radius, startPaint);
+    }
+
+    @NonNull
+    private Paint createPaint() {
         final Paint arcPaint = new Paint();
         arcPaint.setAntiAlias(true);
         arcPaint.setStyle(Paint.Style.STROKE);
         arcPaint.setStrokeWidth(strokeWidth);
-        arcPaint.setColor(color);
+        arcPaint.setColor(strokeColor);
+        arcPaint.setStrokeCap(Paint.Cap.ROUND);
+        return arcPaint;
+    }
+
+    private double calculateArcPerimeter(double angle, double radius) {
+        return Math.toRadians(angle) * radius;
+    }
+
+    private double calculateArcAngle(double perimeter, double radius) {
+        return Math.toDegrees(perimeter/radius);
+    }
+
+    private PointF getPointForAngle(double angle, double radius) {
+        /*
+         * x = cx + r * cos(a)
+         * y = cy + r * sin(a)
+         * Where r is the radius, cx,cy the origin, and a the angle.
+         */
+        // TODO what about the padding?
+        double x = getX() + getWidth()/2.0  + radius * Math.cos(Math.toRadians(angle));
+        double y = getY() + getHeight()/2.0 + radius * Math.cos(Math.toRadians(angle));
+
+        return new PointF((float)x, (float)y);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        // TODO redraw only if configuration has changed
+        final RectF arcRect = createRectF();
+
+        final Paint arcPaint = createPaint();
 
         canvas.drawArc(arcRect, startAngle, endAngle, false, arcPaint);
+
+        drawStartPoint(canvas);
     }
 }

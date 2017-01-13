@@ -11,6 +11,9 @@
             <enum name="bottom" value="1"/>
             <enum name="center" value="2"/>
         </attr>
-        <attr name="startingDegree" format="float" />
+        <attr name="strokeWidth" format="float" />
+        <attr name="strokeColor" format="integer" />
+        <attr name="startAngle" format="float" />
+        <attr name="endAngle" format="float" />
     </declare-styleable>
 </resources>

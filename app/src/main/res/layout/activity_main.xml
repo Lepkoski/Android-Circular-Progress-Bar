@@ -16,14 +16,14 @@
         android:text="Hello World!" />
 
     <br.com.serasaexperian.android.widget.circularprogressbar.CircularProgressBar
-        android:layout_width="257dp"
-        android:layout_height="313dp"
-        custom:startingDegree="45"
-        custom:horizontalAlignment="left"
-        custom:verticalAlignment="top"
+        android:layout_width="wrap_content"
+        android:layout_height="350dp"
+        custom:startAngle="-90"
+        custom:endAngle="245"
+        custom:horizontalAlignment="center"
+        custom:verticalAlignment="bottom"
+        custom:strokeWidth="100"
         android:background="@android:color/darker_gray"
-        android:paddingRight="50dp"
-        android:paddingLeft="50dp"
-        android:paddingBottom="50dp"
-        android:paddingTop="50dp" />
+        android:padding="10dp"
+        android:layout_weight="0.45" />
 </LinearLayout>
