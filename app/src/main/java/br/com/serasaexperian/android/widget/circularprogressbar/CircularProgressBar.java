@@ -30,6 +30,9 @@ public class CircularProgressBar extends View {
     private float right;
     private float bottom;
     private float animationProgress = 0.5f;
+    private float drawableWidth;
+    private float drawableHeight;
+    private float shapeSize;
 
     public CircularProgressBar(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -57,9 +60,8 @@ public class CircularProgressBar extends View {
 
     @NonNull
     private RectF createRectF() {
-        final float drawableWidth = getWidth() - getPaddingLeft() - getPaddingRight();
-        final float drawableHeight = getHeight() - getPaddingTop() - getPaddingBottom();
-        final float shapeSize;
+        drawableWidth = getWidth() - getPaddingLeft() - getPaddingRight();
+        drawableHeight = getHeight() - getPaddingTop() - getPaddingBottom();
         if (drawableWidth < drawableHeight) {
             shapeSize = drawableWidth;
         } else {
@@ -113,14 +115,16 @@ public class CircularProgressBar extends View {
         startPaint.setStrokeWidth(strokeWidth);
         startPaint.setColor(Color.GREEN);
 
-        float left = this.left + (this.right - this.left) / 2f - strokeWidth/2f;
-        float top = this.top - strokeWidth/2f;
+        PointF point = getPointForAngle(0, shapeSize/2.0);
+
+        float left = point.x;
+        float top = point.y;
         float right = left + strokeWidth;
         float bottom = top + strokeWidth;
 
-        float radius =  strokeWidth/2f * (1f - animationProgress);
+        float dotRadius =  strokeWidth/2f * (1f - animationProgress);
 
-        canvas.drawRoundRect(new RectF(left, top, right, bottom), radius, radius, startPaint);
+        canvas.drawRoundRect(new RectF(left, top, right, bottom), dotRadius, dotRadius, startPaint);
     }
 
     @NonNull
@@ -143,14 +147,9 @@ public class CircularProgressBar extends View {
     }
 
     private PointF getPointForAngle(double angle, double radius) {
-        /*
-         * x = cx + r * cos(a)
-         * y = cy + r * sin(a)
-         * Where r is the radius, cx,cy the origin, and a the angle.
-         */
-        // TODO what about the padding?
-        double x = getX() + getWidth()/2.0  + radius * Math.cos(Math.toRadians(angle));
-        double y = getY() + getHeight()/2.0 + radius * Math.cos(Math.toRadians(angle));
+        final float strokeMargin = strokeWidth/2f;
+        double x = drawableWidth/2.0 + getPaddingLeft() - strokeMargin + (radius - strokeMargin) * Math.cos(Math.toRadians(angle));
+        double y = drawableHeight/2.0 + getPaddingTop() - strokeMargin + (radius - strokeMargin) * Math.sin(Math.toRadians(angle));
 
         return new PointF((float)x, (float)y);
     }
