@@ -33,8 +33,6 @@ public class CircularProgressBar extends View {
     private float right;
     private float bottom;
     private float animationProgress = 0.5f;
-    private float drawableWidth;
-    private float drawableHeight;
     private float shapeSize;
 
     public CircularProgressBar(Context context, AttributeSet attrs) {
@@ -66,8 +64,8 @@ public class CircularProgressBar extends View {
 
     @NonNull
     private RectF createRectF() {
-        drawableWidth = getWidth() - getPaddingLeft() - getPaddingRight();
-        drawableHeight = getHeight() - getPaddingTop() - getPaddingBottom();
+        float drawableWidth = getWidth() - getPaddingLeft() - getPaddingRight();
+        float drawableHeight = getHeight() - getPaddingTop() - getPaddingBottom();
         if (drawableWidth < drawableHeight) {
             shapeSize = drawableWidth;
         } else {
